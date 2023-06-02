@@ -20,14 +20,14 @@ ax.axis('off')
 
 COLOR = 'C0'
 # Main spine
-ax.plot([-4.01, 4.03], [0, 0], color=COLOR, linewidth=2, alpha=0.5)
+ax.plot([-4.01, 4], [0, 0], color=COLOR, linewidth=2, alpha=0.5)
 
 
-def section(data: list,
-            category_x: float, category_y: float,
-            cat_angle_x: float, cat_angle_y: float):
+def problems(data: list,
+             category_x: float, category_y: float,
+             cat_angle_x: float, cat_angle_y: float):
     """
-    Draw each section of the Ishikawa plot.
+    Draw each problem section of the Ishikawa plot.
 
     Parameters
     ----------
@@ -44,7 +44,7 @@ def section(data: list,
     None.
 
     """
-    ax.annotate(data[0], xy=(category_x, category_y),
+    ax.annotate(str.upper(data[0]), xy=(category_x, category_y),
                 xytext=(cat_angle_x, cat_angle_y),
                 fontsize='11',
                 xycoords='data',
@@ -57,50 +57,50 @@ def section(data: list,
                           alpha=0.4))
 
 
-def causes(data: list,
-           cause_x: float, cause_y: float,
-           single_cause: tuple = (2.5, 2), cause_xytext=(-14, -0.3)):
+def causes(data: list, cause_x: float, cause_y: float,
+           cause_xytext=(-14, -0.3), top: bool = True):
     """
-    Recursively place each cause to a position relative to
-    the category annotations.
+    Place each cause to a position relative to the problems
+    annotations.
 
     Parameters
     ----------
-    data : indexable object
-        The input data (can be list or tuple).
+    data : indexible object
+        The input data (can be list or tuple). IndexError is
+        raised if more than six arguments are passed.
     cause_x, cause_y : float
-        The `X` and `Y` position of the cause annotation arrows.
-    single_cause : tuple, optional
-        The position of the cause if it is the only one there
-        (the default is (2.5, 2)).
+        The `X` and `Y` position of the cause annotations.
     cause_xytext : tuple, optional
-        The distance of the cause text from the category arrow in Fontsize units.
+        The distance of the cause text from the problem arrow in
+        fontsize units.
+    top : bool
 
     Returns
     -------
     None.
 
     """
-    for problem in data[1]:
-        if len(data[1]) == 1:
-            # Put annotations with 1 single cause in the middle of the arrow
-            cause_x, cause_y = single_cause
+    tuple_index = 0
+    for index, cause in enumerate(data[1]):
+        # First cause annotation is placed in the middle of the problems arrow
+        # and each subsequent cause is plotted above or below it.
+
+        coords = [[0, [0, 0]],
+                  [0.2, [0.5, -0.5]],
+                  [-0.4, [-1, 1]],
+                  [0.6, [1.5, -1.5]],
+                  [-0.8, [-2, 2]],
+                  [1, [2.5, -2.5]]]
+
+        if top:
+            cause_x -= coords[tuple_index][0]
+            cause_y += coords[tuple_index][1][0]
         else:
-            if single_cause[1] > 0:
-                # if section on top (cause_y is positive, 2nd single_cause
-                # num is positive), move each cause to the left and up
-                # by these amounts
-                cause_x -= 0.22
-                cause_y += 0.5
+            cause_x -= coords[tuple_index][0]
+            cause_y += coords[tuple_index][1][1]
+        tuple_index += 1
 
-            else:
-                # if section on bottom (cause_y is negative, 2nd single_cause
-                # num is negative), move each cause to the left and down
-                # by these amounts
-                cause_x -= 0.22
-                cause_y -= 0.5
-
-        ax.annotate(problem, xy=(cause_x, cause_y),
+        ax.annotate(cause, xy=(cause_x, cause_y),
                     xytext=cause_xytext,
                     fontsize='10',
                     xycoords='data',
@@ -117,42 +117,44 @@ def draw_body(*args):
     Parameters
     ----------
     *args : indexable object
-        The input data (can be list or tuple).
+        The input data (can be list or tuple). ValueError is
+        raised if more than six arguments are passed.
 
     Returns
     -------
     None.
 
     """
-    for index, problem in enumerate(args):
-        cause_angle_y = 15
-        cat_y = 0.5  # Move the upper cause lists up or down
-        if index % 2 != 0:
-            cause_angle_y = -15.5
-            cat_y = -0.5  # Move the lower cause lists up or down
-            cause_y = -2
-        else:
-            cause_y = 2
-        if str(index) in '23':
-            cat_arrow_x = 1
-            cat_x = 0.8  # Move the middle pair of cause lists left or right
-            cause_x = 0.0
-        else:
-            cat_arrow_x = 3.5
-            cat_x = 3.2  # Move the first pair of cause lists left or right
-            cause_x = 2.5
-        if str(index) in '45':
-            cat_arrow_x = -1.6
-            cat_x = -1.9  # Move the rear pair of cause lists left or right
-            cause_x = -2.5
 
-        section(problem, cat_arrow_x, 0, -15, cause_angle_y)
-        causes(problem, cat_x, cat_y, (cause_x, cause_y))
+    for index, problem in enumerate(args):
+        top_row = True
+        cause_arrow_y = 1.8
+        if index % 2 != 0:
+            top_row = False
+            prob_angle_y = -15.5
+            cause_arrow_y = -1.8
+        else:
+            prob_angle_y = 15
+        if str(index) in '23':
+            prob_arrow_x = 1
+            cause_arrow_x = 0.2
+        elif str(index) in '45':
+            prob_arrow_x = -1.6
+            cause_arrow_x = -2.4
+        else:
+            prob_arrow_x = 3.5
+            cause_arrow_x = 2.7
+        if index > 5:
+            raise ValueError(f'Maximum number of problems is 6, you have entered'
+                             f'{len(args)}')
+
+        problems(problem, prob_arrow_x, 0, -15, prob_angle_y)
+        causes(problem, cause_arrow_x, cause_arrow_y, top=top_row)
 
 
 # draw fish head
-ax.text(4.15, -0.06, 'Problem', fontsize=12)
-semicircle = Wedge((4.05, 0), 0.8, 270, 90, fc=COLOR, alpha=0.5)
+ax.text(4.08, -0.06, 'PROBLEM', fontsize=12)
+semicircle = Wedge((4.01, 0), 0.9, 270, 90, fc=COLOR, alpha=0.5)
 ax.add_patch(semicircle)
 
 # draw fishtail
@@ -162,8 +164,8 @@ ax.add_patch(triangle)
 
 # Input data
 method = ['Method', ['Time consumption', 'Cost', 'Procedures',
-                     'Inefficient process']]
-machine = ['Machine', ['Faulty equipment', 'Compatibility', ]]
+                     'Inefficient process', 'Performance']]
+machine = ['Machine', ['Faulty equipment', 'Compatibility']]
 material = ['Material', ['Poor-quality input', 'Raw materials', 'Supplier',
                          'Shortage']]
 measure = ['Measurement', ['Calibration', 'Performance', 'Wrong measurements']]
@@ -171,6 +173,5 @@ env = ['Environment', ['Bad conditions']]
 people = ['People', ['Lack of training', 'Managers', 'Labor shortage',
                      'Procedures', 'Skills']]
 
-# Generate plot
 draw_body(method, machine, material, measure, env, people)
 plt.show()
