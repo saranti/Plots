@@ -36,7 +36,7 @@ def problems(data: list,
     category_x, category_y : float, optional
         The `X` and `Y` positions of the category arrows (`Y` defaults to zero).
     cat_angle_x, cat_angle_y : float, optional
-        The angle of the category annotations (default is -15, 15. Annotations
+        The angle of the category annotations (default is 15, -15.5. Annotations
          are angled towards rear of plot).
 
     Returns
@@ -80,8 +80,7 @@ def causes(data: list, cause_x: float, cause_y: float,
     None.
 
     """
-    tuple_index = 0
-    for _, cause in enumerate(data[1]):
+    for index, cause in enumerate(data[1]):
         # First cause annotation is placed in the middle of the problems arrow
         # and each subsequent cause is plotted above or below it.
         coords = [[0, [0, 0]],
@@ -91,12 +90,11 @@ def causes(data: list, cause_x: float, cause_y: float,
                   [-0.8, [-2, 2]],
                   [1, [2.5, -2.5]]]
         if top:
-            cause_x -= coords[tuple_index][0]
-            cause_y += coords[tuple_index][1][0]
+            cause_x -= coords[index][0]
+            cause_y += coords[index][1][0]
         else:
-            cause_x -= coords[tuple_index][0]
-            cause_y += coords[tuple_index][1][1]
-        tuple_index += 1
+            cause_x -= coords[index][0]
+            cause_y += coords[index][1][1]
 
         ax.annotate(cause, xy=(cause_x, cause_y),
                     xytext=cause_xytext,
