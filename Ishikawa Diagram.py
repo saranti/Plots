@@ -81,17 +81,15 @@ def causes(data: list, cause_x: float, cause_y: float,
 
     """
     tuple_index = 0
-    for index, cause in enumerate(data[1]):
+    for _, cause in enumerate(data[1]):
         # First cause annotation is placed in the middle of the problems arrow
         # and each subsequent cause is plotted above or below it.
-
         coords = [[0, [0, 0]],
                   [0.2, [0.5, -0.5]],
                   [-0.4, [-1, 1]],
                   [0.6, [1.5, -1.5]],
                   [-0.8, [-2, 2]],
                   [1, [2.5, -2.5]]]
-
         if top:
             cause_x -= coords[tuple_index][0]
             cause_y += coords[tuple_index][1][0]
@@ -125,7 +123,6 @@ def draw_body(*args):
     None.
 
     """
-
     for index, problem in enumerate(args):
         top_row = True
         cause_arrow_y = 1.8
@@ -135,17 +132,17 @@ def draw_body(*args):
             cause_arrow_y = -1.8
         else:
             prob_angle_y = 15
-        if str(index) in '23':
-            prob_arrow_x = 1
-            cause_arrow_x = 0.2
-        elif str(index) in '45':
-            prob_arrow_x = -1.6
-            cause_arrow_x = -2.4
-        else:
+        if str(index) in '01':
             prob_arrow_x = 3.5
             cause_arrow_x = 2.7
+        elif str(index) in '23':
+            prob_arrow_x = 1
+            cause_arrow_x = 0.2
+        else:
+            prob_arrow_x = -1.6
+            cause_arrow_x = -2.4
         if index > 5:
-            raise ValueError(f'Maximum number of problems is 6, you have entered'
+            raise ValueError(f'Maximum number of problems is 6, you have entered '
                              f'{len(args)}')
 
         problems(problem, prob_arrow_x, 0, -15, prob_angle_y)
@@ -164,7 +161,7 @@ ax.add_patch(triangle)
 
 # Input data
 method = ['Method', ['Time consumption', 'Cost', 'Procedures',
-                     'Inefficient process', 'Performance']]
+                     'Inefficient process']]
 machine = ['Machine', ['Faulty equipment', 'Compatibility']]
 material = ['Material', ['Poor-quality input', 'Raw materials', 'Supplier',
                          'Shortage']]
