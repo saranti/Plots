@@ -20,12 +20,12 @@ ax.axis('off')
 
 COLOR = 'C0'
 # Main spine
-ax.plot([-4.01, 4], [0, 0], color=COLOR, linewidth=2, alpha=0.5)
+main_spine = ax.plot([-4.01, 4], [0, 0], color=COLOR, linewidth=2)
 
 
 def problems(data: list,
-             category_x: float, category_y: float,
-             cat_angle_x: float, cat_angle_y: float):
+             problem_x: float, problem_y: float,
+             prob_angle_x: float, prob_angle_y: float,):
     """
     Draw each problem section of the Ishikawa plot.
 
@@ -33,28 +33,28 @@ def problems(data: list,
     ----------
     data : indexable object
         The input data (can be list or tuple).
-    category_x, category_y : float, optional
-        The `X` and `Y` positions of the category arrows (`Y` defaults to zero).
-    cat_angle_x, cat_angle_y : float, optional
-        The angle of the category annotations (default is 15, -15.5. Annotations
-         are angled towards rear of plot).
+    problem_x, problem_y : float, optional
+        The `X` and `Y` positions of the problem arrows (`Y` defaults to zero).
+    prob_angle_x, prob_angle_y : float, optional
+        The angle of the problem annotations. They are angled towards
+        the tail of the plot.
 
     Returns
     -------
     None.
 
     """
-    ax.annotate(str.upper(data[0]), xy=(category_x, category_y),
-                xytext=(cat_angle_x, cat_angle_y),
+    ax.annotate(str.upper(data[0]), xy=(problem_x, problem_y),
+                xytext=(prob_angle_x, prob_angle_y),
                 fontsize='11',
+                color='white',
+                weight='bold',
                 xycoords='data',
                 textcoords='offset fontsize',
-                arrowprops=dict(arrowstyle="->",
-                                facecolor='black'),
+                arrowprops=dict(arrowstyle="->", facecolor='black'),
                 bbox=dict(boxstyle='square',
                           facecolor=COLOR,
-                          pad=0.8,
-                          alpha=0.4))
+                          pad=0.8))
 
 
 def causes(data: list, cause_x: float, cause_y: float,
@@ -125,11 +125,11 @@ def draw_body(*args):
         top_row = True
         cause_arrow_y = 1.8
         if index % 2 != 0:
-            top_row = False
-            prob_angle_y = -15.5
+            top_row = False  # Plot problems below the spine
+            y_prob_angle = -15.5
             cause_arrow_y = -1.8
         else:
-            prob_angle_y = 15
+            y_prob_angle = 15  # Plot problems above the spine
         if str(index) in '01':
             prob_arrow_x = 3.5
             cause_arrow_x = 2.7
@@ -143,19 +143,20 @@ def draw_body(*args):
             raise ValueError(f'Maximum number of problems is 6, you have entered '
                              f'{len(args)}')
 
-        problems(problem, prob_arrow_x, 0, -15, prob_angle_y)
+        problems(problem, prob_arrow_x, 0, -15, y_prob_angle)
         causes(problem, cause_arrow_x, cause_arrow_y, top=top_row)
 
 
 # draw fish head
-ax.text(4.08, -0.06, 'PROBLEM', fontsize=12)
-semicircle = Wedge((4.01, 0), 0.9, 270, 90, fc=COLOR, alpha=0.5)
+ax.text(4.07, -0.08, 'PROBLEM', fontsize=12, color='white', weight='bold')
+semicircle = Wedge((4.01, 0), 0.9, 270, 90, fc=COLOR)
 ax.add_patch(semicircle)
 
 # draw fishtail
 edges = ((-4.8, 0.8), (-4.8, -0.8), (-4.0, -0.01))
-triangle = Polygon(edges, closed=True, fc=COLOR, alpha=0.5)
+triangle = Polygon(edges, fc=COLOR)
 ax.add_patch(triangle)
+
 
 # Input data
 method = ['Method', ['Time consumption', 'Cost', 'Procedures',
