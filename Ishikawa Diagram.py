@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Wedge, Polygon
 
 # Create the fishbone diagram
-fig, ax = plt.subplots(figsize=(12, 6), layout='constrained')
+fig, ax = plt.subplots(figsize=(10, 6), layout='constrained')
 ax.set_xlim(-5, 5)
 ax.set_ylim(-5, 5)
 ax.axis('off')
@@ -43,10 +43,12 @@ def problems(data: list,
     """
     ax.annotate(str.upper(data[0]), xy=(problem_x, problem_y),
                 xytext=(prob_angle_x, prob_angle_y),
-                fontsize='11',
+                fontsize='10',
                 color='white',
                 weight='bold',
                 xycoords='data',
+                verticalalignment="center",
+                horizontalalignment="center",
                 textcoords='offset fontsize',
                 arrowprops=dict(arrowstyle="->", facecolor='black'),
                 bbox=dict(boxstyle='square',
@@ -55,7 +57,7 @@ def problems(data: list,
 
 
 def causes(data: list, cause_x: float, cause_y: float,
-           cause_xytext=(-10, -0.3), top: bool = True):
+           cause_xytext=(-9, -0.3), top: bool = True):
     """
     Place each cause to a position relative to the problems
     annotations.
@@ -79,13 +81,15 @@ def causes(data: list, cause_x: float, cause_y: float,
     """
     for index, cause in enumerate(data[1]):
         # First cause annotation is placed in the middle of the problems arrow
-        # and each subsequent cause is plotted above or below it.
+        # and each subsequent cause is plotted above or below it in succession.
+
+        # [<x pos>, [<y pos top>, <y pos bottom>]]
         coords = [[0, [0, 0]],
-                  [0.2, [0.5, -0.5]],
-                  [-0.4, [-1, 1]],
-                  [0.6, [1.5, -1.5]],
-                  [-0.8, [-2, 2]],
-                  [1, [2.5, -2.5]]]
+                  [0.28, [0.5, -0.5]],
+                  [-0.56, [-1, 1]],
+                  [0.84, [1.5, -1.5]],
+                  [-1.1, [-2, 2]],
+                  [1.38, [2.5, -2.5]]]
         if top:
             cause_x -= coords[index][0]
             cause_y += coords[index][1][0]
@@ -93,9 +97,10 @@ def causes(data: list, cause_x: float, cause_y: float,
             cause_x -= coords[index][0]
             cause_y += coords[index][1][1]
 
-        ax.annotate(cause, xy=(cause_x, cause_y), horizontalalignment='center',
+        ax.annotate(cause, xy=(cause_x, cause_y),
+                    horizontalalignment='center',
                     xytext=cause_xytext,
-                    fontsize='10',
+                    fontsize='9',
                     xycoords='data',
                     textcoords='offset fontsize',
                     arrowprops=dict(arrowstyle="->",
@@ -118,55 +123,49 @@ def draw_body(*args):
     None.
 
     """
-    num = len(args)  # The number of problems
-    one_section = [3.5, 0.7]
-    two_sections = [1, -1]
-    three_sections = [-1.6, -2]
-
+    second_sections = []
+    third_sections = []
     # Resize diagram to automatically scale in response to the number
     # of problems in the input data.
-    if num == 1 or num == 2:
-        spine_length = (-2.01, 2)
+    if len(args) == 1 or len(args) == 2:
+        spine_length = (-2.1, 2)
         head_pos = (2, 0)
         tail_pos = ((-2.8, 0.8), (-2.8, -0.8), (-2.0, -0.01))
-        one_section[0] = 1.5
-    elif num == 3 or num == 4:
-        spine_length = (-3.01, 3)
+        first_section = [1.6, 0.6]
+    elif len(args) == 3 or len(args) == 4:
+        spine_length = (-3.1, 3)
         head_pos = (3, 0)
         tail_pos = ((-3.8, 0.8), (-3.8, -0.8), (-3.0, -0.01))
-        one_section = [2, 1.2]
-        two_sections[0] = -0.5
-        two_sections[1] = -1.2
+        first_section = [2.6, 1.6]
+        second_sections = [-0.4, -1.4]
     else:  # num == 5 or 6
-        spine_length = (-4.01, 4)
-        head_pos = (4.01, 0)
+        spine_length = (-4.1, 4)
+        head_pos = (4, 0)
         tail_pos = ((-4.8, 0.8), (-4.8, -0.8), (-4.0, -0.01))
-        one_section[0] = 3.5
-        one_section[1] = 2.7
-        two_sections[0] = 1
-        two_sections[1] = 0.2
-        three_sections[0] = -1.6
-        three_sections[1] = -2.4
+        first_section = [3.5, 2.5]
+        second_sections = [1, 0]
+        third_sections = [-1.5, -2.5]
 
     # Change the coordinates of the annotations on each loop.
     for index, problem in enumerate(args):
         top_row = True
-        cause_arrow_y = 1.8
-        if index % 2 != 0:  # Plot problems below the spine
+        cause_arrow_y = 1.7
+        if index % 2 != 0:  # Plot problems below the spine.
             top_row = False
-            y_prob_angle = -15.5
-            cause_arrow_y = -1.8
-        else:  # Plot problems above the spine
-            y_prob_angle = 15
+            y_prob_angle = -16
+            cause_arrow_y = -1.7
+        else:  # Plot problems above the spine.
+            y_prob_angle = 16
+        # Plot the 3 sections in pairs along the main spine.
         if index in (0, 1):
-            prob_arrow_x = one_section[0]
-            cause_arrow_x = one_section[1]
+            prob_arrow_x = first_section[0]
+            cause_arrow_x = first_section[1]
         elif index in (2, 3):
-            prob_arrow_x = two_sections[0]
-            cause_arrow_x = two_sections[1]
+            prob_arrow_x = second_sections[0]
+            cause_arrow_x = second_sections[1]
         else:
-            prob_arrow_x = three_sections[0]
-            cause_arrow_x = three_sections[1]
+            prob_arrow_x = third_sections[0]
+            cause_arrow_x = third_sections[1]
         if index > 5:
             raise ValueError(f'Maximum number of problems is 6, you have entered '
                              f'{len(args)}')
@@ -174,12 +173,14 @@ def draw_body(*args):
         # draw main spine
         ax.plot(spine_length, [0, 0], color=COLOR, linewidth=2)
         # draw fish head
-        ax.text(4.07, -0.08, 'PROBLEM', fontsize=12, color='white', weight='bold')
-        semicircle = Wedge(head_pos, 0.9, 270, 90, fc=COLOR)
+        ax.text(head_pos[0] + 0.1, head_pos[1] - 0.05, 'PROBLEM', fontsize=10,
+                color='white', weight='bold')
+        semicircle = Wedge(head_pos, 1, 270, 90, fc=COLOR)
         ax.add_patch(semicircle)
         # draw fishtail
         triangle = Polygon(tail_pos, fc=COLOR)
         ax.add_patch(triangle)
+
         problems(problem, prob_arrow_x, 0, -15, y_prob_angle)
         causes(problem, cause_arrow_x, cause_arrow_y, top=top_row)
 
